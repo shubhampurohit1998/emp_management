@@ -1,0 +1,2 @@
+Requires django version 3.6
+posgres 12 or 13
