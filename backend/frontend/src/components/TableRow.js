@@ -19,17 +19,19 @@ const Row = (props) => {
   }
   const [dept, setDept] = useState(data.department)
   return (
-    <tr>
+    <tr id={data.id} >
       <td>
         {select_all ? (
           <input
             type="checkbox"
             checked={select_all}
+            name="select_box"
             onClick={(e) => onCheck(e, data.id)}
           />
         ) : (
           <input
             type="checkbox"
+            name="select_box"
             onClick={(e) => onCheck(e, data.id)}
           />
         )}

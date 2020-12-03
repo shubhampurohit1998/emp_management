@@ -2,8 +2,9 @@ import React from "react";
 import Axios from "axios";
 import Row from "../components/TableRow";
 import Message from "../components/Message";
-import Search from '../components/SerchField';
-import ProgressBar from '../components/ProgressBar'
+import Search from "../components/SerchField";
+import ProgressBar from "../components/ProgressBar";
+import "../css/Table.css";
 class Table extends React.Component {
   constructor(props) {
     super(props);
@@ -19,7 +20,7 @@ class Table extends React.Component {
       save_status: null,
       search_text: "",
       csv_loading: false,
-      csv_error: null
+      csv_error: null,
     };
   }
   componentDidMount() {
@@ -42,7 +43,6 @@ class Table extends React.Component {
 
   onCheck = (event, id) => {
     const index = this.state.id_list.indexOf(id);
-    console.log(event.target.checked);
     if (event.target.checked) {
       this.setState((state) => ({ id_list: state.id_list.concat(id) }));
     } else {
@@ -51,8 +51,7 @@ class Table extends React.Component {
   };
 
   createCSV = () => {
-    this.setState({csv_loading: true})
-    console.log(this.state.id_list);
+    this.setState({ csv_loading: true });
     Axios.post("http://127.0.0.1:8000/api/employee/create-csv/", {
       list: this.state.id_list,
     })
@@ -60,9 +59,16 @@ class Table extends React.Component {
         this.setState({ csv_status: response.data, csv_loading: false });
       })
       .catch((error) => {
-        this.setState({csv_loading: false, error: error.message})
+        this.setState({ csv_loading: false, error: error.message });
         alert(error.message);
       });
+  };
+
+  cancelCSVCreation = () => {
+    document.getElementsByName("select_box").forEach(item =>{
+      item.checked = false;
+    })
+    this.setState({id_list: []})
   };
 
   selectAll = (event) => {
@@ -85,7 +91,6 @@ class Table extends React.Component {
   };
 
   saveChanges = () => {
-    console.log(this.state.changes_list);
     Axios.post("http://127.0.0.1:8000/api/employee/save-changes/", {
       list: this.state.changes_list,
     })
@@ -96,7 +101,6 @@ class Table extends React.Component {
       .catch((error) => {
         alert(error.message);
       });
-    console.log(this.state.changes_list);
   };
 
   handleCancel = () => {
@@ -104,17 +108,20 @@ class Table extends React.Component {
   };
 
   handleSearch = (e) => {
-    this.setState({search_text: e.target.value})
-  }
+    this.setState({ search_text: e.target.value });
+  };
 
   handleSearchClick = (e) => {
     e.preventDefault();
-    console.log(this.state.search_text)
-    this.setState({search_text: ''})
-  }
+    if (this.state.search_text) {
+      console.log(this.state.search_text);
+      this.setState({ search_text: "" });
+    } else {
+      console.log("No query");
+    }
+  };
 
   render() {
-    console.log(this.state.list)
     const {
       loading,
       error,
@@ -126,7 +133,7 @@ class Table extends React.Component {
       changes_list,
       search_text,
       csv_loading,
-      csv_error
+      csv_error,
     } = this.state;
     const result = loading ? (
       <div>Loading....</div>
@@ -146,7 +153,11 @@ class Table extends React.Component {
     ) : (
       <div>There is no data</div>
     );
-    const message =csv_loading? <ProgressBar />: csv_error? <Message message={csv_error} type="danger" />: csv_status ? (
+    const message = csv_loading ? (
+      <ProgressBar />
+    ) : csv_error ? (
+      <Message message={csv_error} type="danger" />
+    ) : csv_status ? (
       csv_status.status === "success" ? (
         <Message message={csv_status.message} type="dark" />
       ) : (
@@ -178,18 +189,45 @@ class Table extends React.Component {
         </div>
       ) : null;
 
-    const csv_save_button =
+    const csv_actions =
       id_list.length > 0 ? (
-        <button type="button" className="btn btn-dark" onClick={this.createCSV}>
-          Create CSV
-        </button>
+        <>
+          <div className="col">
+            <button
+              type="button"
+              className="btn btn-dark"
+              onClick={this.createCSV}
+            >
+              Create CSV
+            </button>
+          </div>
+          <div className="col">
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={this.cancelCSVCreation}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
       ) : null;
 
     return (
       <div>
-        {message}
-        <div className="row" >
-          <Search changeValue={search_text} changeFunction={this.handleSearch} clickFunction={this.handleSearchClick} />
+        <div className="row header">
+          <div className="col-md-4"></div>
+          <div className="col-md-4"></div>
+          <div className="col-md-4 search-field">
+            <Search
+              changeValue={search_text}
+              changeFunction={this.handleSearch}
+              clickFunction={this.handleSearchClick}
+            />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-12">{message}</div>
         </div>
         <table className="table table-hover table-dark">
           <thead>
@@ -209,8 +247,12 @@ class Table extends React.Component {
           </thead>
           <tbody>{result}</tbody>
         </table>
-        {csv_save_button}
+        <div className="row" >
+        {csv_actions}
+        </div>
+        <div className="row" >
         {changes_button}
+        </div>
       </div>
     );
   }
