@@ -1,9 +1,9 @@
 import './App.css';
-import Table from './pages/Table'
+import EmployeeRoute from './routes/EmployeeRoutes'
 function App() {
   return (
     <div className="App">
-        <Table />
+      <EmployeeRoute />
     </div>
   );
 }

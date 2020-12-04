@@ -5,6 +5,7 @@ from employee import views
 router = DefaultRouter()
 router.register('api/employee', views.EmployeeViewSet)
 router.register('api/department', views.DepartmentViewSet)
+router.register('api/user', views.UserViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('employee.urls'))

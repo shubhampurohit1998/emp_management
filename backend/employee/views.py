@@ -2,13 +2,14 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from .models import Employee, Department
-from .serializers import EmployeeSerializer, DepartmentSerializer
+from .serializers import EmployeeSerializer, DepartmentSerializer, UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .tasks import create_csv_file
 from .filters import EmployeeFilter
 from django_filters import rest_framework as filters
-
+from django.contrib.auth.models import User
+from django.db.models import Q
 def index(request):
     return render(request, '../templates/employee_list.html', {})
 
@@ -44,6 +45,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(status=status.HTTP_304_NOT_MODIFIED)
 
+    @action(detail=False, methods=['GET', 'POST'], url_name="search", url_path="search")
+    def search(self, request):
+        data = request.GET.get('data')
+        queryset = self.get_queryset().filter(Q(user__first_name__istartswith=data) | Q(user__last_name__istartswith=data) | Q(user__email__istartswith=data))
+        if queryset is not None:
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
@@ -61,3 +73,6 @@ class DepartmentViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

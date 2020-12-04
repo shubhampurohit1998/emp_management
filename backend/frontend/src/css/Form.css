@@ -1,0 +1,10 @@
+.form{
+    /* background-color: darkslategray; */
+    color:grey;
+}
+
+.form-error{
+    color: darkred;
+    font-weight: bold;
+    font-style: italic;
+}

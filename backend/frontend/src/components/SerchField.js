@@ -4,7 +4,7 @@ const Search = (props) => {
   const { changeValue, changeFunction, clickFunction } = props;
   return (
     <div>
-      <form>
+      <form onSubmit={(e) => clickFunction(e)} >
         <div className="form-row align-items-center">
           <div className="col-auto">
             <label className="sr-only" htmlFor="inlineFormInput">

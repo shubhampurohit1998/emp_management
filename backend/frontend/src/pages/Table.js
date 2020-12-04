@@ -65,10 +65,10 @@ class Table extends React.Component {
   };
 
   cancelCSVCreation = () => {
-    document.getElementsByName("select_box").forEach(item =>{
+    document.getElementsByName("select_box").forEach((item) => {
       item.checked = false;
-    })
-    this.setState({id_list: []})
+    });
+    this.setState({ id_list: [], select_all_flag: false });
   };
 
   selectAll = (event) => {
@@ -109,12 +109,19 @@ class Table extends React.Component {
 
   handleSearch = (e) => {
     this.setState({ search_text: e.target.value });
+    Axios.get(`http://127.0.0.1:8000/api/employee/search/?data=${e.target.value}`).then(response => {
+      this.setState({list: response.data})
+      console.log(response.data)
+    }).catch(error => {
+      this.setState({error: error.message})
+    })
   };
 
   handleSearchClick = (e) => {
     e.preventDefault();
     if (this.state.search_text) {
       console.log(this.state.search_text);
+
       this.setState({ search_text: "" });
     } else {
       console.log("No query");
@@ -165,12 +172,10 @@ class Table extends React.Component {
       )
     ) : null;
 
-    const changes_button =
+    const change_actions =
       changes_list.length > 0 ? (
-        <div className="row">
-          <div className="col-md-4"></div>
-
-          <div className="col-md-2">
+        <>
+          <div className="col">
             <button
               type="button"
               className="btn btn-dark"
@@ -180,13 +185,13 @@ class Table extends React.Component {
             </button>
           </div>
 
-          <div className="col-md-2">
+          <div className="col">
             <button className="btn btn-danger" onClick={this.handleCancel}>
               Cancel
             </button>
           </div>
           <div className="col-md-4"></div>
-        </div>
+        </>
       ) : null;
 
     const csv_actions =
@@ -233,7 +238,7 @@ class Table extends React.Component {
           <thead>
             <tr>
               <th scope="col">
-                <input type="checkbox" onClick={(e) => this.selectAll(e)} />
+                <input type="checkbox" checked={select_all_flag} onClick={(e) => this.selectAll(e)} />
               </th>
               <th scope="col">ID</th>
               <th scope="col">Name</th>
@@ -247,12 +252,8 @@ class Table extends React.Component {
           </thead>
           <tbody>{result}</tbody>
         </table>
-        <div className="row" >
-        {csv_actions}
-        </div>
-        <div className="row" >
-        {changes_button}
-        </div>
+        <div className="row">{csv_actions}</div>
+        <div className="row">{change_actions}</div>
       </div>
     );
   }
